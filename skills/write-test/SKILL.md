@@ -1,0 +1,91 @@
+---
+name: write-test
+description: >
+  React 프로젝트의 테스트를 작성한다. 컨텍스트를 분석해 적합한 테스트 유형을 선택하고,
+  모범사례에 맞춰 테스트 코드를 작성한다. "테스트 작성", "테스트 써줘", "/write-test" 등으로 호출된다.
+---
+
+## 대상 프로젝트 확인
+
+`package.json`에 `react` 의존성이 없으면 이 스킬을 실행하지 않는다.
+
+---
+
+## 실행 절차
+
+### Step 1. 프로젝트 설정 파악
+
+프로젝트 루트에서 `project-config.md`를 찾는다.
+
+있으면: 파일을 읽어 테스트 환경 설정을 파악한다.
+
+없으면: 아래 파일들을 직접 읽어 설정을 파악하고, `project-config.md`를 생성해 채운다.
+- `package.json` (devDependencies에서 테스트 도구 확인)
+- `vitest.config.*` / `jest.config.*` (globals, environment, setupFiles)
+- `playwright.config.*` (E2E 설정 여부)
+
+파악할 항목: 테스트 러너, globals 여부, setupFiles 경로, jest-dom 여부, MSW 여부, 커스텀 setup 함수 경로, 테스트 파일 위치 관례.
+
+context7 MCP가 사용 가능하면 확인된 라이브러리 버전의 공식 문서를 조회해 API를 정확히 참조한다.
+
+---
+
+### Step 2. 테스트 대상 파악
+
+파일이 명시된 경우: 해당 파일을 읽는다.
+
+파일이 명시되지 않은 경우: 최근 수정된 파일을 탐색하거나, 대화 맥락에서 대상을 파악한다. 판단이 어려우면 사용자에게 확인한다.
+
+대상 파일을 읽은 후, import하는 훅·유틸·하위 컴포넌트도 필요한 만큼 읽어 전체 맥락을 파악한다.
+
+파악할 것:
+- 무엇을 하는 코드인가 (단일 컴포넌트, 훅, 유틸, 페이지, 여러 모듈 조합)
+- 외부 의존성이 있는가 (API 호출, Context, 전역 상태)
+- 핵심 비즈니스 로직이 어디에 있는가
+- 이미 존재하는 테스트 파일이 있는가 (있으면 읽어 중복 방지)
+
+---
+
+### Step 3. 테스트 유형 선택
+
+`test-selection.md`의 결정 트리를 기준으로 유형을 결정한다.
+
+결정 후 사용자에게 아래를 간략히 제시한다:
+- 선택한 유형과 이유
+- 해당 유형의 한계 (선택에 영향을 줄 정도인 경우만)
+- 대안이 있다면 한 줄로 언급
+
+사용자가 다른 유형을 원하면 그에 따른다.
+
+---
+
+### Step 4. 환경 구성 확인
+
+선택한 유형에 필요한 도구가 프로젝트에 설정되어 있는지 확인한다.
+
+| 유형 | 확인 항목 |
+|------|----------|
+| 단위/통합 | `vitest.config.*` 또는 `jest.config.*` |
+| E2E | `playwright.config.*` |
+| 시각적 회귀 | `vitest.config.*`에 `browser.enabled: true` |
+
+**미구성이면 코드를 작성하지 않는다.** 설정 방법을 안내하고 완료 후 진행한다.
+
+---
+
+### Step 5. 테스트 작성
+
+유형에 따라 아래 문서를 참조해 작성한다:
+
+| 유형 | 참조 문서 |
+|------|----------|
+| 단위/통합 | `writing-rules.md`, `rtl-patterns.md`, `mocking-patterns.md` |
+| E2E | `writing-rules.md`, `e2e-best-practices.md` |
+| 시각적 회귀 | `visual-regression.md` |
+
+작성 시 반드시 지키는 것:
+- `project-config.md`에 커스텀 setup 함수가 있으면 반드시 사용한다
+- `project-config.md`의 globals 설정에 따라 import 여부를 결정한다
+- 테스트 파일 위치와 네이밍은 `project-config.md`의 관례를 따른다
+- AAA 패턴으로 구조화한다
+- 디스크립션은 "무엇을 했을 때 어떻게 된다" 형태로 작성한다
