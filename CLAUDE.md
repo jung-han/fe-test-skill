@@ -45,9 +45,10 @@ React 기반만. `package.json`에 `react` 의존성 없으면 스킬 발동 안
 
 ### review-test
 1. `project-config.md` 탐지 (위와 동일)
-2. `@references/review-checklist.md`의 검수 순서대로 평가
-3. 각 관점에서 참조 문서의 ❌ 패턴 기준으로 문제 수집
-4. 출력 포맷에 맞춰 결과 제시
+2. 전체 테스트 파일 스캔 → 파일명 나열 → 최대 50개 선별 (AI 판단)
+3. 리뷰 계획 출력 (레이어별 선별 파일 수) → 사용자 조정 후 진행
+4. `@references/review-checklist.md` 기준으로 파일별 검수
+5. 결과 리포트: 요약(상단) + 파일별 액션 아이템(하단)
 
 ---
 
@@ -112,7 +113,14 @@ fe-test-skill/
 - [x] `skills/write-test/SKILL.md` 작성
 - [x] `skills/review-test/SKILL.md` 작성
 
-### Phase 2.5: 구조 정리 ✅
+### Phase 2.5: review-test 전략 개선 ✅
+- [x] 리뷰 계획 수립 단계 추가 (파일 나열 → 선별 → 사용자 확인)
+- [x] 적응형 파일 선별: 전체 파일 나열 후 AI 판단으로 최대 50개 선택
+- [x] 선별 기준: 유형 다양성, 줄 수, 경로 다양성, 모킹 밀도
+- [x] 리포트 구조: 요약(이슈 건수 + 반복 패턴) 상단, 파일별 액션 아이템 하단
+- [x] 심각도 정렬: 🔴 → 🟡 → 🔵 순
+
+### Phase 2.6: 구조 정리 ✅
 - [x] `docs/` → `.claude/rules/` + `.claude/templates/` + `references/` 로 재구성
 - [x] `rules/`: 자동 로드 대상 (`test-selection.md`, `writing-rules.md`)
 - [x] `templates/`: 사용자 프로젝트에 복사되는 틀 (`project-config.md`)
@@ -151,6 +159,9 @@ fe-test-skill/
 | 2026-04-26 | review-checklist는 관점만 정의 | SSOT — 규칙 내용은 각 docs가 담당 |
 | 2026-05-03 | `.claude/rules/` + `.claude/templates/` + `references/` 구조 | rules 자동 로드, templates 복사 원본, references SSOT 패턴 라이브러리 |
 | 2026-05-03 | 문서 내 파일 참조 `@` 형식 사용 | Claude가 파일을 명시적으로 참조하는 방식과 일치 |
+| 2026-05-03 | review-test 리뷰 계획 단계 추가 | 검수 전 파일 선별 과정 투명화, 사용자 조정 기회 제공 |
+| 2026-05-03 | 적응형 파일 선별 (최대 50개, AI 판단) | 레이어 고정 상한 제거 → 커버리지 극대화 |
+| 2026-05-03 | 리포트 요약+파일별 액션 아이템 구조 | 전체 패턴 파악(상단) + 구체적 수정 지점(하단) 분리 |
 
 ## 참고 링크
 
