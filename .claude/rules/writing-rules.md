@@ -40,6 +40,70 @@ describe('TextField', () => {
 
 ---
 
+## 테스트 데이터 작성 원칙
+
+**데이터는 it 블록 안에, 그 테스트가 드러내려는 의미만큼만**
+
+팩토리 헬퍼 함수(`makeEvent`, `createMockUser` 등) 생성 금지. 케이스 수가 적을 땐 추상화 비용 > 반복 비용. 각 `it` 블록 안에 필요한 데이터를 직접 선언한다.
+
+```ts
+// ❌ 헬퍼 함수로 추출 — 내부를 추적해야 함
+const event = makeEvent({ title: '회의' });
+
+// ✅ 인라인 선언 — 그 자리에서 바로 읽힘
+const event: Event = { id: '1', title: '회의', date: '2025-10-15', ... };
+```
+
+테스트와 무관한 필드는 빈 문자열/0 등 최솟값으로 압축해 검증 대상 필드가 눈에 띄게 한다.
+
+---
+
+## 비교값은 항상 리터럴 직접 작성
+
+비교값을 쓰는 **모든 자리**에 변수 참조 대신 리터럴을 직접 작성. `toBe` / `toEqual` / `toHaveLength` / `toHaveBeenCalledWith` / `toMatchObject` 등 모든 matcher에 적용.
+
+```ts
+// ❌ 변수 참조 — 선언 위치를 추적해야 함
+const expected = [{ id: '1', title: '회의' }];
+expect(result).toEqual(expected);
+
+// ✅ 리터럴 직접 — 그 자리에서 즉시 읽힘
+expect(result).toEqual([{ id: '1', title: '회의' }]);
+```
+
+---
+
+## 부분 검증은 다른 필드의 버그를 놓친다
+
+특정 필드만 확인하는 단언은, 검증하지 않은 필드가 틀려도 테스트가 통과한다.
+
+```ts
+// 실제 저장된 이벤트: { id: '1', title: '회의', notificationTime: 0 }  ← notificationTime 버그
+
+// ❌ 모두 통과 — notificationTime: 0 버그를 놓침
+expect(result.events[0].title).toBe('회의');
+expect(result.events[0]).toMatchObject({ id: '1', title: '회의' });
+expect(result.events.map(e => e.id)).toContain('1');
+
+// ✅ notificationTime이 틀리면 실패
+expect(result.events[0]).toEqual({
+  id: '1',
+  title: '회의',
+  date: '2025-10-15',
+  startTime: '09:00',
+  endTime: '10:00',
+  description: '',
+  location: '',
+  category: '업무',
+  repeat: { type: 'none', interval: 0 },
+  notificationTime: 10,
+});
+```
+
+데이터 정합성 검증엔 `toEqual` 전체 구조 비교. 부분 검증(`toMatchObject`, 특정 필드 접근)은 그 필드 외에는 아무것도 보장하지 않는다.
+
+---
+
 ## 테스트 패턴: AAA 패턴을 사용한다.
 
 **AAA (Arrange-Act-Assert)**
