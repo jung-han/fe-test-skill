@@ -3,7 +3,7 @@
 ## globals 설정
 
 `vitest.config`에 `globals: true`가 설정된 프로젝트에서는 `vi`, `describe`, `it`, `test`, `expect`, `beforeEach` 등을 **import 없이** 사용.
-설정 여부는 `project-patterns-template.md` 또는 `vitest.config.*` 확인.
+설정 여부는 `project-config.md` 또는 `vitest.config.*` 확인.
 
 ```ts
 // globals: true — import 불필요

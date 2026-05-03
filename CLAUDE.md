@@ -31,7 +31,7 @@ React 기반만. `package.json`에 `react` 의존성 없으면 스킬 발동 안
 ## context7 MCP
 
 사용 가능한 경우: 프로젝트의 라이브러리 버전 확인 → context7로 해당 버전 공식 문서 조회 → 버전별 API 반영.
-없으면 생략하고 docs/ 파일 기준으로 작성.
+없으면 생략하고 references/ 파일 기준으로 작성.
 
 ---
 
@@ -39,26 +39,35 @@ React 기반만. `package.json`에 `react` 의존성 없으면 스킬 발동 안
 
 ### write-test
 1. 사용자 프로젝트 루트에서 `project-config.md` 탐지
-2. 없으면 `package.json`, `vitest.config.*` 등 읽어서 생성
-3. `test-selection.md` 기준으로 테스트 유형 결정
-4. 유형에 맞는 docs 참조해서 작성
+2. 없으면 `package.json`, `vitest.config.*` 등 읽어서 `@.claude/templates/project-config.md` 기준으로 생성
+3. `@.claude/rules/test-selection.md` 기준으로 테스트 유형 결정
+4. 유형에 맞는 `@references/` 문서 참조해서 작성
 
 ### review-test
 1. `project-config.md` 탐지 (위와 동일)
-2. `review-checklist.md`의 검수 순서대로 평가
+2. `@references/review-checklist.md`의 검수 순서대로 평가
 3. 각 관점에서 참조 문서의 ❌ 패턴 기준으로 문제 수집
 4. 출력 포맷에 맞춰 결과 제시
 
 ---
 
-## 참고 문서 (docs/)
+## 참고 문서
 
+### `.claude/rules/` (자동 로드)
+| 파일 | 역할 |
+|------|------|
+| `test-selection.md` | 테스트 유형 선택 기준 (결정 트리, 장단점, 전략) |
+| `writing-rules.md` | 핵심 4원칙, AAA 패턴, Vitest API |
+
+### `.claude/templates/` (스킬이 명시적 참조)
+| 파일 | 역할 |
+|------|------|
+| `project-config.md` | 사용자 프로젝트에 생성할 config 템플릿 |
+
+### `references/` (스킬이 명시적 참조)
 | 파일 | 역할 | 사용 시점 |
 |------|------|----------|
-| `project-config.template.md` | 사용자 프로젝트에 생성할 config 템플릿 | 스킬 최초 실행 시 |
-| `test-selection.md` | 테스트 유형 선택 기준 (결정 트리, 장단점, 전략) | 유형 판단 시 |
 | `review-checklist.md` | 검수 관점 및 출력 포맷 | review-test 실행 시 |
-| `writing-rules.md` | 핵심 4원칙, AAA 패턴, Vitest API | 작성/검수 공통 |
 | `rtl-patterns.md` | RTL 쿼리, userEvent, waitFor, 안티패턴 | 단위/통합 테스트 |
 | `mocking-patterns.md` | vi.fn/spyOn, 모듈 모킹, 타이머, MSW | 모킹 필요 시 |
 | `e2e-best-practices.md` | Playwright 패턴, API 모킹 원칙 | E2E 테스트 |
@@ -71,18 +80,21 @@ React 기반만. `package.json`에 `react` 의존성 없으면 스킬 발동 안
 ```
 fe-test-skill/
 ├── CLAUDE.md
-├── skills/
-│   ├── write-test/SKILL.md        ← (Phase 2)
-│   └── review-test/SKILL.md       ← (Phase 2)
-└── docs/
-    ├── project-config.template.md
-    ├── test-selection.md
-    ├── review-checklist.md
-    ├── writing-rules.md
-    ├── rtl-patterns.md
-    ├── mocking-patterns.md
-    ├── e2e-best-practices.md
-    └── visual-regression.md
+├── .claude/
+│   ├── rules/                     ← 자동 로드
+│   │   ├── test-selection.md
+│   │   └── writing-rules.md
+│   └── templates/                 ← 스킬이 사용자 프로젝트에 복사
+│       └── project-config.md
+├── references/                    ← 스킬이 명시적으로 참조
+│   ├── review-checklist.md
+│   ├── rtl-patterns.md
+│   ├── mocking-patterns.md
+│   ├── e2e-best-practices.md
+│   └── visual-regression.md
+└── skills/
+    ├── write-test/SKILL.md
+    └── review-test/SKILL.md
 ```
 
 ---
@@ -99,6 +111,14 @@ fe-test-skill/
 ### Phase 2: 스킬 작성 ✅
 - [x] `skills/write-test/SKILL.md` 작성
 - [x] `skills/review-test/SKILL.md` 작성
+
+### Phase 2.5: 구조 정리 ✅
+- [x] `docs/` → `.claude/rules/` + `.claude/templates/` + `references/` 로 재구성
+- [x] `rules/`: 자동 로드 대상 (`test-selection.md`, `writing-rules.md`)
+- [x] `templates/`: 사용자 프로젝트에 복사되는 틀 (`project-config.md`)
+- [x] `references/`: 스킬이 `@` 경로로 명시 참조하는 패턴 라이브러리
+- [x] 모든 문서 내 경로 참조 `@` 형식으로 통일
+- [x] `mocking-patterns.md` 버그 수정 (`project-patterns-template.md` → `project-config.md`)
 
 ### Phase 3: 검증
 - [ ] `.claude/settings.json`에 로컬 플러그인 등록
@@ -129,6 +149,8 @@ fe-test-skill/
 | 2026-04-26 | 시각적 회귀: Vitest Browser Mode 중심 | 무료, 기존 스택 확장, 실제 픽셀 캡처 |
 | 2026-04-26 | project-config를 사용자 프로젝트에 생성 | 스킬 패키지 안에 고정되면 안 됨 |
 | 2026-04-26 | review-checklist는 관점만 정의 | SSOT — 규칙 내용은 각 docs가 담당 |
+| 2026-05-03 | `.claude/rules/` + `.claude/templates/` + `references/` 구조 | rules 자동 로드, templates 복사 원본, references SSOT 패턴 라이브러리 |
+| 2026-05-03 | 문서 내 파일 참조 `@` 형식 사용 | Claude가 파일을 명시적으로 참조하는 방식과 일치 |
 
 ## 참고 링크
 

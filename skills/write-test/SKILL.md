@@ -19,14 +19,22 @@ description: >
 
 있으면: 파일을 읽어 테스트 환경 설정을 파악한다.
 
-없으면: 아래 파일들을 직접 읽어 설정을 파악하고, `project-config.md`를 생성해 채운다.
+없으면: 아래 파일들을 직접 읽어 설정을 파악하고, `@.claude/templates/project-config.md`를 기준으로 프로젝트 루트에 `project-config.md`를 생성해 채운다.
 - `package.json` (devDependencies에서 테스트 도구 확인)
 - `vitest.config.*` / `jest.config.*` (globals, environment, setupFiles)
 - `playwright.config.*` (E2E 설정 여부)
 
 파악할 항목: 테스트 러너, globals 여부, setupFiles 경로, jest-dom 여부, MSW 여부, 커스텀 setup 함수 경로, 테스트 파일 위치 관례.
 
-context7 MCP가 사용 가능하면 확인된 라이브러리 버전의 공식 문서를 조회해 API를 정확히 참조한다.
+확인된 라이브러리 버전이 references/의 예시와 다를 수 있다. 아래 버전 분기를 확인해 코드 예시를 조정한다:
+
+| 라이브러리 | 확인 포인트 |
+|-----------|------------|
+| `msw` | v1: `rest.get`, `ctx.json()` / v2: `http.get`, `HttpResponse.json()` |
+| `@testing-library/user-event` | v13: `userEvent.click()` 동기 / v14: `await user.click()` 비동기 + `setup()` 필수 |
+| `@testing-library/react` | v13 이하: `render` import 방식 다를 수 있음 |
+
+context7 MCP가 사용 가능하면 확인된 버전의 공식 문서를 조회해 API를 정확히 참조한다.
 
 ---
 
@@ -48,7 +56,7 @@ context7 MCP가 사용 가능하면 확인된 라이브러리 버전의 공식 �
 
 ### Step 3. 테스트 유형 선택
 
-`test-selection.md`의 결정 트리를 기준으로 유형을 결정한다.
+`@.claude/rules/test-selection.md`의 결정 트리를 기준으로 유형을 결정한다.
 
 결정 후 사용자에게 아래를 간략히 제시한다:
 - 선택한 유형과 이유
@@ -79,9 +87,9 @@ context7 MCP가 사용 가능하면 확인된 라이브러리 버전의 공식 �
 
 | 유형 | 참조 문서 |
 |------|----------|
-| 단위/통합 | `writing-rules.md`, `rtl-patterns.md`, `mocking-patterns.md` |
-| E2E | `writing-rules.md`, `e2e-best-practices.md` |
-| 시각적 회귀 | `visual-regression.md` |
+| 단위/통합 | `@.claude/rules/writing-rules.md`, `@references/rtl-patterns.md`, `@references/mocking-patterns.md` |
+| E2E | `@.claude/rules/writing-rules.md`, `@references/e2e-best-practices.md` |
+| 시각적 회귀 | `@references/visual-regression.md` |
 
 작성 시 반드시 지키는 것:
 - `project-config.md`에 커스텀 setup 함수가 있으면 반드시 사용한다

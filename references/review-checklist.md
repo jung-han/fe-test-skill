@@ -14,7 +14,7 @@
 ---
 
 ### 2. 테스트 유형이 적합한가
-`test-selection.md`의 결정 트리와 장단점 기준으로 판단한다.
+`@.claude/rules/test-selection.md`의 결정 트리와 장단점 기준으로 판단한다.
 
 확인할 것:
 - 지금 작성된 테스트가 올바른 유형(단위/통합/E2E/시각적 회귀)인가
@@ -24,7 +24,7 @@
 ---
 
 ### 3. 작성 원칙을 지키고 있는가
-`writing-rules.md`의 핵심 4원칙 기준으로 각 테스트를 평가한다.
+`@.claude/rules/writing-rules.md`의 핵심 4원칙 기준으로 각 테스트를 평가한다.
 
 확인할 것:
 - 내부 구현(state, private 메서드)을 직접 테스트하고 있진 않은가 (원칙 1)
@@ -35,17 +35,17 @@
 ---
 
 ### 4. RTL 안티패턴이 있는가
-`rtl-patterns.md`에서 ❌로 표시된 패턴이 코드에 존재하는지 확인한다.
+`@references/rtl-patterns.md`에서 ❌로 표시된 패턴이 코드에 존재하는지 확인한다.
 
 ---
 
 ### 5. 모킹이 적절한가
-`mocking-patterns.md`의 모킹 원칙과 초기화 패턴 기준으로 평가한다.
+`@references/mocking-patterns.md`의 모킹 원칙과 초기화 패턴 기준으로 평가한다.
 
 ---
 
 ### 6. E2E 테스트인 경우
-`e2e-best-practices.md`의 패턴 기준으로 평가한다.
+`@references/e2e-best-practices.md`의 패턴 기준으로 평가한다.
 
 ---
 
