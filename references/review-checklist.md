@@ -44,12 +44,17 @@
 
 ---
 
-### 6. E2E 테스트인 경우
+### 6. 데이터 전략을 따르고 있는가
+`@.claude/rules/test-data-strategy.md`의 원칙 기준으로 평가한다.
+
+---
+
+### 7. E2E 테스트인 경우
 `@references/e2e-best-practices.md`의 패턴 기준으로 평가한다.
 
 ---
 
-### 7. 프로젝트 관례를 따르고 있는가
+### 8. 프로젝트 관례를 따르고 있는가
 `project-config.md`에 커스텀 setup 함수가 정의되어 있는데 사용하지 않고 있진 않은가.
 
 ---

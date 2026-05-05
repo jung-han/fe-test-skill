@@ -99,8 +99,8 @@ context7 MCP가 사용 가능하면 확인된 버전의 공식 문서를 조회�
 
 | 유형 | 참조 문서 |
 |------|----------|
-| 단위/통합 | `@.claude/rules/writing-rules.md`, `@references/rtl-patterns.md`, `@references/mocking-patterns.md` |
-| E2E | `@.claude/rules/writing-rules.md`, `@references/e2e-best-practices.md` |
+| 단위/통합 | `@.claude/rules/writing-rules.md`, `@.claude/rules/test-data-strategy.md`, `@references/rtl-patterns.md`, `@references/mocking-patterns.md` |
+| E2E | `@.claude/rules/writing-rules.md`, `@.claude/rules/test-data-strategy.md`, `@references/e2e-best-practices.md` |
 | 시각적 회귀 | `@references/visual-regression.md` |
 
 작성 시 반드시 지키는 것:
@@ -109,3 +109,4 @@ context7 MCP가 사용 가능하면 확인된 버전의 공식 문서를 조회�
 - 테스트 파일 위치와 네이밍은 `project-config.md`의 관례를 따른다
 - AAA 패턴으로 구조화한다
 - 디스크립션은 "무엇을 했을 때 어떻게 된다" 형태로 작성한다
+- 시간/API 응답/도메인 데이터는 `@.claude/rules/test-data-strategy.md` 기준으로 작성한다

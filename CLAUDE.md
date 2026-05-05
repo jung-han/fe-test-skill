@@ -58,7 +58,8 @@ React 기반만. `package.json`에 `react` 의존성 없으면 스킬 발동 안
 | 파일 | 역할 |
 |------|------|
 | `test-selection.md` | 테스트 유형 선택 기준 (결정 트리, 장단점, 전략) |
-| `writing-rules.md` | 핵심 4원칙, AAA 패턴, Vitest API |
+| `writing-rules.md` | 핵심 4원칙, AAA 패턴, setupTests 점검, Vitest API |
+| `test-data-strategy.md` | 시간/API/데이터의 계층화된 기본값 + 분기점 오버라이드 전략 |
 
 ### `.claude/templates/` (스킬이 명시적 참조)
 | 파일 | 역할 |
