@@ -1,21 +1,57 @@
 # RTL 패턴 (React Testing Library)
 
+## 핵심 원칙
+
+> "The more your tests resemble the way your software is used, the more confidence they can give you."
+> — Kent C. Dodds
+
+1. **DOM 기반** — 컴포넌트 인스턴스가 아닌 DOM 노드와 상호작용한다.
+2. **사용자 중심** — 실제 사용자가 앱을 다루는 방식과 유사하게 테스트한다.
+3. **단순/유연** — API와 구현은 단순해야 한다.
+
+이후 모든 쿼리·이벤트 권장사항은 이 원칙에서 파생된다.
+
+출처: https://testing-library.com/docs/guiding-principles
+
+---
+
 ## 쿼리 선택
 
-요소를 가져올 때는 아래 우선순위를 따른다. 접근성 트리 기반 쿼리일수록 실제 사용자가 앱을 사용하는 방식에 가깝기 때문이다.
+요소를 가져올 때는 **우선순위**가 있다. 접근성 트리 기반일수록 실제 사용자의 사용 방식에 가깝기 때문이다. **위 단계부터 시도하고, 불가능할 때만 아래로 내려간다.**
 
-1. `getByRole` — 최우선으로 사용한다
-2. `getByLabelText` — form 요소에 사용한다
-3. `getByPlaceholderText`
-4. `getByText`
-5. `getByTestId` — 위 쿼리로 대체 불가한 경우에만 사용한다
-6. `container.querySelector` — 사용하지 않는다
+### 1단계 — 누구나 접근 가능 (Accessible to Everyone)
+스크린리더 사용자를 포함한 모든 사용자가 인지하는 방식.
+
+| 우선 | 쿼리 | 용도 |
+|------|------|------|
+| 1 | `getByRole` | 거의 모든 인터랙티브 요소. `name` 옵션으로 필터. |
+| 2 | `getByLabelText` | form 필드. 사용자가 라벨로 입력칸을 찾는 방식. |
+| 3 | `getByPlaceholderText` | 라벨이 없는 경우만 (라벨이 권장). |
+| 4 | `getByText` | 비-인터랙티브 요소(div, span 등)의 텍스트. |
+| 5 | `getByDisplayValue` | 값이 채워진 폼 요소 (편집 화면 초기 상태 검증). |
+
+### 2단계 — 시맨틱 (Semantic)
+브라우저/스크린리더 지원이 일관되지 않을 수 있음.
+
+| 우선 | 쿼리 | 용도 |
+|------|------|------|
+| 6 | `getByAltText` | `<img>`, `<area>`, `<input type="image">`. |
+| 7 | `getByTitle` | `title` 속성. 지원 제한적이라 비추. |
+
+### 3단계 — Test ID
+사용자에게 보이지 않음. 1·2단계로 도저히 안 될 때만.
+
+| 우선 | 쿼리 | 용도 |
+|------|------|------|
+| 8 | `getByTestId` | role/text로 구분 불가능한 dynamic content. |
+
+사용 금지: `container.querySelector` — 클래스/ID는 사용자에게 의미 없다.
 
 ```tsx
-// ✅
+// ✅ 1단계
 screen.getByRole('button', { name: /제출/i });
 
-// ❌ — 접근성 쿼리로 대체 가능한데 testId 사용
+// ❌ 1단계로 가능한데 testId 사용
 screen.getByTestId('submit-button');
 ```
 
@@ -25,21 +61,36 @@ screen.getByTestId('submit-button');
 
 ## 쿼리 변형 선택
 
-- 요소가 **존재함**을 검증할 때는 `getBy*`를 사용한다. 없으면 즉시 에러를 던져 명확한 실패 지점을 알려주기 때문이다.
-- 요소가 **없음**을 검증할 때는 `queryBy*`를 사용한다. `getBy*`는 없으면 에러를 던지기 때문에 부재 검증에 쓸 수 없다.
-- **비동기로 나타나는** 요소를 기다릴 때는 `findBy*`를 사용한다. `waitFor(() => getBy*())`와 동일하지만 더 명확하다.
+목적에 맞게 변형을 고른다. 0/1/>1 매치 시 동작이 다르므로 **검증하려는 상황과 반환값을 일치시켜야** 한다.
+
+| 쿼리 | 0 매치 | 1 매치 | >1 매치 | 비동기 |
+|------|--------|--------|---------|--------|
+| `getBy...`      | throw  | element | throw | ✗ |
+| `queryBy...`    | null   | element | throw | ✗ |
+| `findBy...`     | throw  | element | throw | ✓ |
+| `getAllBy...`   | throw  | array   | array | ✗ |
+| `queryAllBy...` | []     | array   | array | ✗ |
+| `findAllBy...`  | throw  | array   | array | ✓ |
+
+선택 기준:
+- 요소가 **존재함**을 검증 → `getBy*` (없으면 즉시 throw, 명확한 실패 지점).
+- 요소가 **없음**을 검증 → `queryBy*` (`getBy*`는 throw하므로 부재 검증 불가).
+- 요소가 **비동기로 등장** → `findBy*` (`waitFor(() => getBy*())`와 동일하지만 더 명확).
+- 여러 개 → `*All*` 변형.
+
+기본 타임아웃: `findBy*` / `waitFor` = 1000ms, 폴링 50ms.
 
 ```tsx
-// ✅ 존재 확인
+// ✅ 존재
 expect(screen.getByRole('button')).toBeInTheDocument();
 
-// ✅ 부재 확인
+// ✅ 부재
 expect(screen.queryByText('에러 메시지')).not.toBeInTheDocument();
 
 // ✅ 비동기 대기
 const el = await screen.findByText('로딩 완료');
 
-// ❌ — waitFor 안에서 getBy 사용하지 않는다, findBy로 대체한다
+// ❌ — waitFor 안에서 getBy 사용 금지, findBy로 대체
 await waitFor(() => screen.getByText('로딩 완료'));
 ```
 
