@@ -64,11 +64,11 @@ const event: Event = { id: '1', title: '회의', date: '2025-10-15', ... };
 
 ```ts
 // ❌ 변수 참조 — 선언 위치를 추적해야 함
-const expected = [{ id: '1', title: '회의' }];
+const expected = [{ id: "1", title: "회의" }];
 expect(result).toEqual(expected);
 
 // ✅ 리터럴 직접 — 그 자리에서 즉시 읽힘
-expect(result).toEqual([{ id: '1', title: '회의' }]);
+expect(result).toEqual([{ id: "1", title: "회의" }]);
 ```
 
 ---
@@ -81,21 +81,21 @@ expect(result).toEqual([{ id: '1', title: '회의' }]);
 // 실제 저장된 이벤트: { id: '1', title: '회의', notificationTime: 0 }  ← notificationTime 버그
 
 // ❌ 모두 통과 — notificationTime: 0 버그를 놓침
-expect(result.events[0].title).toBe('회의');
-expect(result.events[0]).toMatchObject({ id: '1', title: '회의' });
-expect(result.events.map(e => e.id)).toContain('1');
+expect(result.events[0].title).toBe("회의");
+expect(result.events[0]).toMatchObject({ id: "1", title: "회의" });
+expect(result.events.map((e) => e.id)).toContain("1");
 
 // ✅ notificationTime이 틀리면 실패
 expect(result.events[0]).toEqual({
-  id: '1',
-  title: '회의',
-  date: '2025-10-15',
-  startTime: '09:00',
-  endTime: '10:00',
-  description: '',
-  location: '',
-  category: '업무',
-  repeat: { type: 'none', interval: 0 },
+  id: "1",
+  title: "회의",
+  date: "2025-10-15",
+  startTime: "09:00",
+  endTime: "10:00",
+  description: "",
+  location: "",
+  category: "업무",
+  repeat: { type: "none", interval: 0 },
   notificationTime: 10,
 });
 ```
@@ -131,6 +131,7 @@ it('지정된 시간이 된 경우 알림이 새롭게 생성되어 추가된다
 ```
 
 다음과 같은 주석은 쓰지 않는다:
+
 - `// Arrange` `// Act` `// Assert` (구조 라벨)
 - `// 알림 2건을 직접 주입` 처럼 바로 아래 코드를 그대로 풀어 쓴 설명
 - `// hook을 마운트한다` 같은 함수명을 한국어로 옮긴 것
@@ -176,6 +177,7 @@ test: {
 테스트를 작성하기 전 반드시 `setupFiles`로 등록된 파일(보통 `src/setupTests.ts`)을 읽는다. 전역 hook(`beforeAll` / `beforeEach` / `afterEach` / `afterAll`)에서 무엇이 이미 처리되는지 파악해야 테스트 본문에서 중복 setup·teardown을 작성하지 않을 수 있다.
 
 확인할 항목:
+
 - MSW server `listen()` / `resetHandlers()` / `close()` — 테스트에서 다시 호출 금지
 - `vi.useFakeTimers()` / `vi.setSystemTime()` — 시간 고정이 이미 되어 있으면 다시 설정하지 말 것 (다른 시각이 필요한 테스트만 오버라이드)
 - `vi.clearAllMocks()` / `vi.resetAllMocks()` — 호출 내역이 이미 초기화되므로 테스트별 `mockClear()` 불필요
@@ -184,15 +186,15 @@ test: {
 
 ```tsx
 // ❌ setupTests에서 이미 vi.useFakeTimers + vi.setSystemTime을 처리하는데도 중복
-it('알림이 생성된다', () => {
+it("알림이 생성된다", () => {
   vi.useFakeTimers();
-  vi.setSystemTime(new Date('2025-10-01'));
+  vi.setSystemTime(new Date("2025-10-01"));
   // ...
   vi.useRealTimers(); // ← afterAll에서 이미 복원됨
 });
 
 // ✅ 전역 처리에 의존, 다른 시각이 필요한 경우만 setSystemTime 오버라이드
-it('알림이 생성된다', () => {
+it("알림이 생성된다", () => {
   vi.setSystemTime(new Date(2025, 9, 1, 9, 0, 0)); // 글로벌 기본값과 다른 시각이 필요할 때만
   // ...
 });

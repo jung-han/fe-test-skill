@@ -86,17 +86,17 @@ fe-test-skill/
 │   ├── rules/                     ← 자동 로드
 │   │   ├── test-selection.md
 │   │   └── writing-rules.md
-│   └── templates/                 ← 스킬이 사용자 프로젝트에 복사
-│       └── project-config.md
-├── references/                    ← 스킬이 명시적으로 참조
-│   ├── review-checklist.md
-│   ├── rtl-patterns.md
-│   ├── mocking-patterns.md
-│   ├── e2e-best-practices.md
-│   └── visual-regression.md
-└── skills/
-    ├── write-test/SKILL.md
-    └── review-test/SKILL.md
+│   ├── templates/                 ← 스킬이 사용자 프로젝트에 복사
+│   │   └── project-config.md
+│   └── skills/                    ← Claude Code 자동 감지 (standalone 폼)
+│       ├── write-test/SKILL.md
+│       └── review-test/SKILL.md
+└── references/                    ← 스킬이 명시적으로 참조
+    ├── review-checklist.md
+    ├── rtl-patterns.md
+    ├── mocking-patterns.md
+    ├── e2e-best-practices.md
+    └── visual-regression.md
 ```
 
 ---
@@ -111,8 +111,8 @@ fe-test-skill/
 - [x] docs/ 구조 정리 (SSOT 원칙, 선택 기준 단일화, 검수 관점 분리)
 
 ### Phase 2: 스킬 작성 ✅
-- [x] `skills/write-test/SKILL.md` 작성
-- [x] `skills/review-test/SKILL.md` 작성
+- [x] `.claude/skills/write-test/SKILL.md` 작성
+- [x] `.claude/skills/review-test/SKILL.md` 작성
 
 ### Phase 2.5: review-test 전략 개선 ✅
 - [x] 리뷰 계획 수립 단계 추가 (파일 나열 → 선별 → 사용자 확인)
