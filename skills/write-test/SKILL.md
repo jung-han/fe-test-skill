@@ -26,6 +26,18 @@ description: >
 
 파악할 항목: 테스트 러너, globals 여부, setupFiles 경로, jest-dom 여부, MSW 여부, 커스텀 setup 함수 경로, 테스트 파일 위치 관례.
 
+#### setupFiles 파일 자체를 읽는다
+
+설정 파일에서 `setupFiles` 경로를 찾았다면, **그 파일의 내용도 반드시 읽는다.** 전역 hook(`beforeAll` / `beforeEach` / `afterEach` / `afterAll`)에서 무엇이 이미 처리되는지 파악해야 테스트 본문에서 중복 setup·teardown을 작성하지 않을 수 있다. 적용 규칙은 `@.claude/rules/writing-rules.md`의 "setupTests를 먼저 읽고 작성한다" 섹션 참조.
+
+#### setupTests가 없거나 미흡한 경우
+
+`setupFiles` 자체가 등록되어 있지 않거나, 파일이 비어 있거나, 단위/통합 테스트에 필요한 최소 구성(jest-dom import, MSW server 등록, mock 정리, fake timers, 시스템 시간 고정)이 빠져 있으면 **테스트 작성을 멈추고** 사용자에게 권장 구조를 안내한다.
+
+권장 구조: `@.claude/templates/setup-tests.ts` (MSW v2 + jest-dom + 모든 테스트 fake timers + `vi.setSystemTime`로 시간 고정 + clear/reset 패턴 포함).
+
+사용자가 채택하면 해당 템플릿을 setupFiles 경로(보통 `src/setupTests.ts`)에 그대로 복사하고, `vitest.config.*`에 등록되어 있는지 확인한 뒤 Step 2로 진행한다. 프로젝트 사정에 맞게 일부 hook을 빼거나 시각을 바꿀 수 있지만, **변경 사항은 사용자와 합의 후** 적용한다.
+
 확인된 라이브러리 버전이 references/의 예시와 다를 수 있다. 아래 버전 분기를 확인해 코드 예시를 조정한다:
 
 | 라이브러리 | 확인 포인트 |

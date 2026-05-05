@@ -106,22 +106,34 @@ expect(result.events[0]).toEqual({
 
 ## 테스트 패턴: AAA 패턴을 사용한다.
 
-**AAA (Arrange-Act-Assert)**
+**AAA (Arrange-Act-Assert)** — 구조는 따르되, `// Arrange` `// Act` `// Assert` 주석은 코드만 봐도 자명하면 생략한다.
 
 ```tsx
+// ✅ 코드 블록 사이를 빈 줄로 구분 — 주석 없이도 AAA 구조가 드러남
 it("className prop으로 설정한 css class가 적용된다.", async () => {
-  // Arrange — 환경 준비
   await render(<TextField className="my-class" />);
 
-  // Act — 동작 재현 (렌더링 검증만이면 생략 가능)
-  // 클릭, 입력, prop 변경 등이 여기 해당
-
-  // Assert — 결과 검증
   expect(screen.getByPlaceholderText("텍스트를 입력해 주세요.")).toHaveClass(
     "my-class",
   );
 });
 ```
+
+주석을 남기는 경우는 그 줄에 **숨은 의도/제약**이 있을 때로 한정한다. 예: 특정 시간 고정의 이유, 워크어라운드, 외부 동작에 의존하는 결정.
+
+```tsx
+// ✅ 주석이 가치를 더하는 경우 — 왜 이 시각인지가 자명하지 않음
+it('지정된 시간이 된 경우 알림이 새롭게 생성되어 추가된다', () => {
+  // 로컬 09:00 고정 — 글로벌 setupTests의 UTC midnight은 timezone에 따라 timeDiff 계산이 달라져 실패
+  vi.setSystemTime(new Date(2025, 9, 1, 9, 0, 0));
+  ...
+});
+```
+
+다음과 같은 주석은 쓰지 않는다:
+- `// Arrange` `// Act` `// Assert` (구조 라벨)
+- `// 알림 2건을 직접 주입` 처럼 바로 아래 코드를 그대로 풀어 쓴 설명
+- `// hook을 마운트한다` 같은 함수명을 한국어로 옮긴 것
 
 ---
 
@@ -156,6 +168,37 @@ test: {
   setupFiles: ["vitest.setup.js"];
 }
 ```
+
+---
+
+## setupTests를 먼저 읽고 작성한다
+
+테스트를 작성하기 전 반드시 `setupFiles`로 등록된 파일(보통 `src/setupTests.ts`)을 읽는다. 전역 hook(`beforeAll` / `beforeEach` / `afterEach` / `afterAll`)에서 무엇이 이미 처리되는지 파악해야 테스트 본문에서 중복 setup·teardown을 작성하지 않을 수 있다.
+
+확인할 항목:
+- MSW server `listen()` / `resetHandlers()` / `close()` — 테스트에서 다시 호출 금지
+- `vi.useFakeTimers()` / `vi.setSystemTime()` — 시간 고정이 이미 되어 있으면 다시 설정하지 말 것 (다른 시각이 필요한 테스트만 오버라이드)
+- `vi.clearAllMocks()` / `vi.resetAllMocks()` — 호출 내역이 이미 초기화되므로 테스트별 `mockClear()` 불필요
+- `expect.hasAssertions()` — 모든 테스트가 어설션을 1개 이상 가져야 함
+- jest-dom 매처 import — 다시 import 금지
+
+```tsx
+// ❌ setupTests에서 이미 vi.useFakeTimers + vi.setSystemTime을 처리하는데도 중복
+it('알림이 생성된다', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2025-10-01'));
+  // ...
+  vi.useRealTimers(); // ← afterAll에서 이미 복원됨
+});
+
+// ✅ 전역 처리에 의존, 다른 시각이 필요한 경우만 setSystemTime 오버라이드
+it('알림이 생성된다', () => {
+  vi.setSystemTime(new Date(2025, 9, 1, 9, 0, 0)); // 글로벌 기본값과 다른 시각이 필요할 때만
+  // ...
+});
+```
+
+setupTests 파일 자체가 없으면 작성을 멈추고 사용자에게 구성을 안내한다(스킬 Step 1 참조).
 
 ---
 
