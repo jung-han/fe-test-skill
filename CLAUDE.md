@@ -69,9 +69,10 @@ React 기반만. `package.json`에 `react` 의존성 없으면 스킬 발동 안
 ### `references/` (스킬이 명시적 참조)
 | 파일 | 역할 | 사용 시점 |
 |------|------|----------|
+| `scenario-design.md` | 시나리오 도출 7기법 (Use Case/ECP/BVA/Decision Table/State Transition/Pairwise/Property-Based/Error Guessing) | write-test의 시나리오 도출 단계, review-test의 도출 충실도 평가 |
 | `review-checklist.md` | 검수 관점 및 출력 포맷 | review-test 실행 시 |
 | `rtl-patterns.md` | RTL 쿼리, userEvent, waitFor, 안티패턴 | 단위/통합 테스트 |
-| `mocking-patterns.md` | vi.fn/spyOn, 모듈 모킹, 타이머, MSW | 모킹 필요 시 |
+| `mocking-patterns.md` | vi.fn/spyOn, 모듈 모킹, 타이머, MSW, Test Double 분류 | 모킹 필요 시 |
 | `e2e-best-practices.md` | Playwright 패턴, API 모킹 원칙 | E2E 테스트 |
 | `visual-regression.md` | Vitest Browser Mode, 스냅샷 관리 | 시각적 회귀 테스트 |
 

@@ -18,11 +18,69 @@ import { vi } from 'vitest';
 
 ## 모킹 원칙
 
-실제 구현을 사용할 수 있으면 모킹하지 않는다. 모킹이 많아질수록 테스트가 구현에 결합되어 유지보수 비용이 증가하기 때문이다.
+**가능한 한 모킹하지 않는다.** 모킹이 많아질수록 테스트가 구현에 결합되어 신뢰도가 낮아지고 유지보수 비용이 증가한다. RTL의 핵심 원칙(`@references/rtl-patterns.md`의 "사용자처럼 테스트")과 직결된다.
 
-모킹이 필요한 경우는 단위 테스트에서 외부 의존성을 격리할 때로 제한한다.
+### 결정 트리 — inter-system vs intra-system
 
-통합 테스트에서 API를 모킹할 때는 MSW를 사용한다. `vi.fn()`으로 fetch를 직접 모킹하면 실제 네트워크 레이어와 동작이 달라져 테스트 신뢰도가 낮아지기 때문이다.
+```
+무엇을 모킹할지 고민 중이면 먼저 분류:
+
+├─ 외부 시스템 (HTTP, 시간, FS, 브라우저 API, 외부 SDK)
+│   = inter-system communication
+│   → 모킹 정당. 어떤 도구를 쓸지는 "모킹 대상별 도구 매핑" 표 참조.
+│
+└─ 내부 모듈 (도메인 hook, 유틸, 같은 시스템 내 컴포넌트)
+    = intra-system communication
+    → 가능하면 실제 사용. 모킹은 마지막 수단.
+        ├─ 격리해야 진짜 단위 테스트가 되는 작은 함수 → 예외적으로 vi.fn / vi.spyOn 허용
+        └─ 외에는 통합 테스트로 묶어 실제 협력 검증 (Kent C. Dodds)
+```
+
+근거: 도메인 내부 협력은 "구현 세부사항"이라 모킹하면 리팩터링에 깨지고 신뢰도 잃음. 외부 경계는 빠져나가는 지점이라 모킹이 격리에 정당.
+
+### 통합 테스트의 API 모킹
+
+`vi.fn()`으로 fetch/axios를 직접 모킹하지 않는다. 네트워크 레이어와 동작이 달라져 신뢰도가 떨어진다. **MSW**로 네트워크 경계에서 인터셉트한다 (아래 "MSW" 섹션).
+
+---
+
+## Test Double — 무엇을 쓰고 있는지 인식
+
+Vitest API를 쓸 때 "이게 5종 중 어느 것인지" 의식하면 의도가 명확해지고 안티패턴을 식별하기 쉽다. 분류는 Gerard Meszaros / Martin Fowler의 정의를 따른다.
+
+| 종류 | 정의 | Vitest 매핑 |
+|------|------|-------------|
+| **Dummy** | 자리 채우기용. 실제 호출 안 됨. | `vi.fn()` (단언 없이 prop으로만 전달) |
+| **Stub** | 미리 정해진 응답 반환. 호출 검증 X. | `vi.fn().mockReturnValue(...)`, `mockResolvedValue(...)` |
+| **Spy** | stub + 호출 정보 기록. 원본 동작 유지 가능. | `vi.spyOn(obj, 'method')` |
+| **Mock** | 호출 기대치를 사전 프로그래밍 → behavior verification. | `vi.fn()` + `expect(fn).toHaveBeenCalledWith(...)` |
+| **Fake** | 동작하는 구현이지만 프로덕션 부적합 (in-memory DB 등). | MSW의 in-memory CRUD 핸들러, 자체 작성 fake module |
+
+핵심 차이: **Mock만 행동(behavior) 검증**. 나머지는 상태(state) 검증.
+
+자주 헷갈리는 지점:
+- `vi.fn()`은 **Stub과 Mock의 어느 쪽이든** 될 수 있다. `expect(fn).toHaveBeenCalledWith(...)`로 호출을 검증하면 Mock이고, 단지 응답만 제공하면 Stub이다.
+- `vi.spyOn()`은 기본 Spy(원본 유지). `.mockReturnValue()`까지 붙이면 Stub처럼 동작.
+
+> 안티패턴: Mock이 필요한데 Stub로 멈춤 → 호출 검증 누락. 반대로 Stub이면 충분한데 Mock으로 작성 → 구현 결합.
+
+---
+
+## 모킹 대상별 도구 매핑
+
+본 프로젝트의 표준 매핑. **setupTests에 이미 등록된 패턴이면 거기에 맞춰 사용**하고, 새로 정의하지 않는다.
+
+| 모킹 대상 | 권장 도구 | 비고 |
+|-----------|-----------|------|
+| 시간 | `vi.setSystemTime` / `vi.useFakeTimers` | setupTests에서 글로벌 고정 권장 (`@.claude/rules/test-data-strategy.md`) |
+| HTTP | MSW (`setupServer` + `handlers.ts`) | setupTests에서 server.listen, 테스트별 `server.use`로 분기 |
+| 모듈 (router 등) | `vi.mock` | 호이스팅됨, 파일 상단 위치 무관 |
+| 환경변수 | `vi.stubEnv` | afterEach에서 unstub 또는 `vi.unstubAllEnvs()` |
+| 글로벌 (alert, location 등) | `vi.stubGlobal` + `vi.unstubAllGlobals` 짝 | `clearAllMocks`/`resetAllMocks`는 stubGlobal 복원 안 함 — 명시적 unstub 필요 |
+| 콜백 props | `vi.fn` | 호출 인자/횟수 검증 |
+| 객체 메서드 | `vi.spyOn` | 원본 유지하며 추적 |
+
+setupTests에 이미 정의된 항목이면 테스트 본문에서 다시 호출하지 않는다 (중복 setup 방지 — `@.claude/rules/writing-rules.md` "setupTests를 먼저 읽고 작성한다").
 
 ---
 
@@ -211,6 +269,17 @@ afterAll(() => {
 ```
 
 참고: https://medium.com/@yujso66/번역-당신의-jest-테스트는-잘못되어-있을-수도-있습니다-866f5f982ff9
+
+---
+
+## 부록 — 학파 컨텍스트
+
+테스트 학파는 두 갈래로 나뉜다 (Martin Fowler, "Mocks Aren't Stubs"):
+
+- **Classical (Detroit)** — 가능하면 실제 객체 사용. 외부 시스템(DB, HTTP, FS)만 모킹. 상태 검증.
+- **Mockist (London)** — 모든 협력자(neighboring class)를 모킹. 행동 검증, outside-in.
+
+**본 프로젝트는 Classical 입장.** 위 "모킹 원칙"의 결정 트리(inter/intra-system)가 Vladimir Khorikov의 정리("intra-system communications are implementation details") 그대로다. 결과적으로 Kent C. Dodds의 "Write tests. Not too many. Mostly integration."과도 부합한다 — 통합 테스트가 신뢰도 ROI 최고.
 
 ---
 

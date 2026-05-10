@@ -58,6 +58,8 @@ description: >
 선정된 파일을 하나씩 읽고, `@references/review-checklist.md`의 검수 순서대로 평가한다.
 각 관점에서 참조 문서의 ❌ 패턴 및 원칙 위반을 확인한다.
 
+특히 시나리오 도출 관점(checklist의 #3)은 `@references/scenario-design.md`의 7가지 도출 기법을 기준으로 평가한다 — main flow만 검증하고 alternative/exception 누락, ECP/BVA 경계 누락, Decision Table 없이 즉흥 작성된 다중 조건 등.
+
 ---
 
 ### Step 4. 결과 출력

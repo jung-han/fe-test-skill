@@ -23,7 +23,25 @@
 
 ---
 
-### 3. 작성 원칙을 지키고 있는가
+### 3. 시나리오 도출이 충분한가
+`@references/scenario-design.md`의 7가지 black-box 도출 기법 기준으로 평가한다.
+
+확인할 것:
+- **Use Case**: main flow만 검증하고 alternative / exception flow가 누락되진 않았는가
+- **ECP / BVA**: 폼/입력 검증에서 boundary(min, min±1, max, max±1)가 빠지진 않았는가
+- **Decision Table**: 다중 조건(조건 2개 이상)이 즉흥 작성되어 일부 조합만 검증되고 있진 않은가
+- **State Transition**: 상태 흐름의 prev / cancel / 새로고침 / 무효 전이가 누락되진 않았는가
+- **Pairwise**: 변수 4개 이상의 옵션 조합을 모두 또는 일부만 자의적으로 골라 작성하진 않았는가
+- **Error Guessing**: null / undefined / 빈 문자열 / 멀티바이트 / 매우 큰 수 등 흔한 엣지가 빠지진 않았는가
+
+심각도 기준:
+- 핵심 비즈니스 로직(결제, 인증)에서 exception flow 누락 → **Critical**
+- 입력 검증의 boundary 누락 → **Major**
+- Error Guessing 체크리스트 일부 미반영 → **Minor**
+
+---
+
+### 4. 작성 원칙을 지키고 있는가
 `@.claude/rules/writing-rules.md`의 핵심 4원칙 기준으로 각 테스트를 평가한다.
 
 확인할 것:
@@ -34,27 +52,27 @@
 
 ---
 
-### 4. RTL 안티패턴이 있는가
+### 5. RTL 안티패턴이 있는가
 `@references/rtl-patterns.md`에서 ❌로 표시된 패턴이 코드에 존재하는지 확인한다.
 
 ---
 
-### 5. 모킹이 적절한가
+### 6. 모킹이 적절한가
 `@references/mocking-patterns.md`의 모킹 원칙과 초기화 패턴 기준으로 평가한다.
 
 ---
 
-### 6. 데이터 전략을 따르고 있는가
+### 7. 데이터 전략을 따르고 있는가
 `@.claude/rules/test-data-strategy.md`의 원칙 기준으로 평가한다.
 
 ---
 
-### 7. E2E 테스트인 경우
+### 8. E2E 테스트인 경우
 `@references/e2e-best-practices.md`의 패턴 기준으로 평가한다.
 
 ---
 
-### 8. 프로젝트 관례를 따르고 있는가
+### 9. 프로젝트 관례를 따르고 있는가
 `project-config.md`에 커스텀 setup 함수가 정의되어 있는데 사용하지 않고 있진 않은가.
 
 ---
